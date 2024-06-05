@@ -19,6 +19,9 @@ const Login = () => {
     axios.post('http://localhost:5000/api/login', formData)
       .then(response => {
         if (response.status === 200 && response.data.message === 'Login successful') {
+          const token = response.data.token;
+          // Store the token in local storage
+          localStorage.setItem('token', token);
           setMessage('Hello');
         } else {
           setMessage('An error occurred. Please try again.');
