@@ -1,6 +1,3 @@
-require('dotenv').config();
-
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
@@ -50,11 +47,15 @@ app.post('/api/login', (req, res) => {
   const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
   
   db.query(query, [email, password], (err, results) => {
-    if (err) throw err;
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
+      return;
+    }
     if (results.length > 0) {
-      res.send('Login successful');
+      res.json({ message: 'Login successful', user: results[0] });
     } else {
-      res.send('Invalid credentials');
+      res.status(401).json({ message: 'Invalid username or password' });
     }
   });
 });
@@ -89,4 +90,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
-
