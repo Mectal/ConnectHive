@@ -85,16 +85,53 @@ If problems occur please review README.md documents and if problems continue tal
     -verify if the database and tables exist and are confirgured correctly
 
 # Pushing to GitHub and commands
+    - git clone https://github.com/Mectal/ConnectHive.git, to clone repository onto local device
     - go to ConnectHive Directory, cd path/to/your/connecthive
     - do "git status" to check changes you made and what is ready to be committed
+    - do "git checkout -b [name of update]", create a few branch for newly added features and or fixes
+    - do "git checkout [branch name]", to switch branches
+    - do "git branch", to see currently branch you are on
     - do "git add ." - for adding all the changes you made to the repo
     - do "git add filename" to add specific files only
-    - do "git commit -m "[description of changes made and important details]" "
-    - do "git push origin master" to push changes to the repository, typically pushes changes to the default branch in this case the master branch
-    
+    - do "git commit -m "description of changes made and important details" 
+    - do "git fetch origin" to fetch update from local repository
+    - do "git rebase origin/master" to apply changes ontop of the latest changes from master
+    - do "git push origin [name of update]" to push changes to the repository, pushes branch to the repository under the same name
+    - open pull request in GitHub to merge your branch into master, describe changes and request reviews from team (5 people needed to merge into master branch)
+    - do "git checkout master", prepare to merge changes into master
+    - do "git pull origin master", update local master branch with latest changes from github
+    - do "git merge [name of update]
+    - do git push origin master, to push updated master branch to github
+    ------------------------------------------------------------------------------------------
+# clean up and organization of github
+    - do "git branch -d [name of update], deletes branch locally
+    - do "git push origin --delete [name of update] branch, deletes on remote repository
+    - do "git branch -r --merged", list remote branches that merged into master branch and can be deleted
+    - do "git stash", temporarily saves changes without committing
+    - do "git stash apply", apply stash changes later
+    - do "git revert HEAD", undo last commit
+    - do "git reset --hard commit_id", to reset branch to previous commit
+    - do "git log", to view history of commits
+
+# GitHub practices 
+Best Practices for Using Git
+Always Branch for New Features:
+Start a new branch for every feature or fix to keep master clean and stable.
+
+Commit Frequently:
+Regularly commit small changes with clear messages to maintain a clear history.
+
+Rebase Before Merging:
+Rebase your feature branch onto master to keep a linear history and avoid complex merges.
+
+Use Pull Requests for Code Reviews:
+Leverage PRs to ensure changes are reviewed and approved before merging into master.
+
+Keep master Up-to-Date:
+Regularly pull the latest changes from master to avoid conflicts and ensure your branch has the latest updates.
+
 ### Summary
 
 - The **Backend `README.md`** includes setup instructions for the backend environment, how to configure and run the server, and details on database setup and API endpoints.
 - The **Frontend `README.md`** covers how to start and manage the React application using Create React App, along with the project's directory structure and available scripts.
-
 
