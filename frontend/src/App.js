@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Register from './Register';
-import Login from './Login';
-import Profile from './Profile';
+import Login from './components/Login';
+import Register from './components/Register';
+import Profile from './components/Profile';
+
+
 import './App.css';
 
 function App() {

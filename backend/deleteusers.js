@@ -23,14 +23,26 @@ db.connect((err) => {
   }
   console.log('MySQL Connected...');
 
-  rl.question('Enter the email of the user to delete: ', (email) => {
-    const deleteQuery = 'DELETE FROM users WHERE email = ?';
+  // Prompt for the email addresses to delete
+  rl.question('Enter the emails of the users to delete (separated by commas or spaces): ', (input) => {
+    // Split the input into an array of emails, trimming whitespace
+    const emails = input.split(/[\s,]+/).filter(Boolean);
     
-    db.query(deleteQuery, [email], (err, result) => {
+    if (emails.length === 0) {
+      console.log('No valid emails provided.');
+      db.end();
+      rl.close();
+      return;
+    }
+
+    // Prepare the query to delete multiple emails
+    const deleteQuery = `DELETE FROM users WHERE email IN (${emails.map(() => '?').join(',')})`;
+    
+    db.query(deleteQuery, emails, (err, result) => {
       if (err) {
-        console.error('Error deleting user:', err);
+        console.error('Error deleting users:', err);
       } else {
-        console.log(`Deleted user with email: ${email}`);
+        console.log(`Deleted ${result.affectedRows} user(s) with email(s): ${emails.join(', ')}`);
       }
 
       // Close the database connection
@@ -39,5 +51,5 @@ db.connect((err) => {
     });
   });
 });
-
-// del command deleteusers.js and enter email of who you want to delete 
+ // node deleteusers.js and enter email(s) of user(s) who you wish to delete doing username@email and for multiple users 
+ // deletions seperate by using a comma username@email, username2@email, username3@email, etc...
