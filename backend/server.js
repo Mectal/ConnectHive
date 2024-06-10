@@ -108,7 +108,6 @@ app.post('/api/login', (req, res) => {
 
 
 // Profile Creation (protected route)
-// Profile Creation (protected route)
 app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
   const { userId, hobbies, personality, lifestyle, socialPreferences, beliefs, goals } = req.body; // Ensure 'beliefs' matches the column in your table
 
