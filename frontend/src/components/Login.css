@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #f6f5f7;
+    font-family: 'Poppins', sans-serif;
+}
+
+.login-page .container {
+    display: flex;
+    width: 850px;
+    height: 500px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-page .form-container {
+    position: relative;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 50px;
+}
+
+.login-page .social-container {
+    margin: 20px 0;
+}
+
+.login-page .social-container a {
+    border: 1px solid #ddd;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    color: #333;
+    margin: 0 5px;
+}
+
+.login-page input[type="email"], .login-page input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.login-page button {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #d4a710;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.login-page .overlay-container {
+    background-color: #d4a710;
+    width: 40%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 0 40px;
+}
+
+.login-page .overlay-panel {
+    margin-top: 30px;
+}
+
+.login-page .overlay-panel h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.login-page .overlay-panel p {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.login-page button.ghost {
+    background-color: transparent;
+    border: 2px solid white;
+    width: auto;
+    padding: 10px 20px;
+}
+
+.login-page button.ghost:hover {
+    background-color: white;
+    color: #d4a710;
+}

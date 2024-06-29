@@ -1,0 +1,230 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.navbar-logo {
+  width: 150px;
+  cursor: pointer;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  margin: auto;
+}
+
+.form-container form {
+  width: 100%;
+}
+
+.dropdown, .open-modal-btn, .box {
+  width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.dropbtn, .open-modal-btn {
+  width: 40%; /* Reduce width */
+  margin: auto; /* Center the button */
+  text-align: center; /* Center the text */
+  background-color: #d4a710;
+  color: white;
+  padding: 8px 0; /* Reduce padding */
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 15px; /* Adjust font size */
+}
+
+.birthday {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Changed to left align */
+  margin-bottom: 15px; /* Add margin to create space */
+}
+
+.birthday-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.birthday-labels label {
+  width: 32%;
+  text-align: left; /* Left align */
+}
+
+.birthday-inputs {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.birthday-input {
+  width: 32%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-size: 14px;
+}
+
+.gender-selection {
+  display: flex;
+  justify-content: flex-start; /* Changed to left align */
+  width: 100%;
+  margin-bottom: 15px; /* Add margin to create space */
+}
+
+.gender-selection label {
+  width: 32%;
+  text-align: center;
+}
+
+.location-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px; /* Add margin to create space */
+}
+
+.geo-btn {
+  background-color: #d4a710;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.geo-btn:hover {
+  background-color: #ddbf15bd;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  width: 100%;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn, .open-modal-btn:hover {
+  background-color: #ddbf15bd;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hobbies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.hobbies-grid label {
+  background-color: #e0e0e0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hobbies-grid input {
+  display: none;
+}
+
+.hobbies-grid label:hover {
+  background-color: #d0d0d0;
+}
+
+.hobbies-grid input:checked + label,
+.hobbies-grid .selected {
+  background-color: #d4a710 !important;
+  color: white;
+}
+
+.selected-option {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #555;
+}
+
+.selected-interests {
+  margin-top: 10px;
+}
+
+.selected-interests .selected-option {
+  display: inline-block;
+  background-color: #d4a710;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}

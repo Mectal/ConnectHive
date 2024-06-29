@@ -112,6 +112,7 @@ If problems occur please review README.md documents and if problems continue tal
     - do "git revert HEAD", undo last commit
     - do "git reset --hard commit_id", to reset branch to previous commit
     - do "git log", to view history of commits
+    - do "git rm -rf --cached, to remove all files from repo to respect .gitignore rules then follow Push to git and commands to read with .
 
 # GitHub practices 
 Best Practices for Using Git
