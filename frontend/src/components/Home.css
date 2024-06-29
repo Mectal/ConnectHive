@@ -1,0 +1,130 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.hero {
+  width: 100%;
+  min-height: 100vh;
+  background-image: url('../assets/ConnectHiveBackground.jpeg');
+  background-position: center;
+  background-size: cover;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+nav {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  width: 180px;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #d4a710;
+  font-weight: 400;
+}
+
+.login-btn, .btn {
+  text-decoration: none;
+  color: #d4a710;
+  font-weight: 400;
+  
+}
+
+.login-btn {
+  display: inline-block;
+  padding: 14px 40px;
+  color: #fff; /* White text color */
+  background-color: #f1c40f; /* Solid gold background */
+  font-size: 14px;
+  border-radius: 30px;
+  margin-right: 20px; /* Added right margin to create space between this and the next button */
+  transition: 0.5s;
+  
+}
+
+.login-btn:hover {
+  background-color: #f39c12; /* Darker gold on hover */
+  border-top-right-radius: 30px; /* Keep rounded corner style on hover */
+  
+}
+
+.content {
+  position: absolute;
+  top: 50%;
+  left: 5%;  /* Reduced from 10% to shift it further to the left */
+  transform: translateY(-50%);
+  max-width: 600px;
+  z-index: 2; /* Ensures text is above the image */
+}
+
+.content h1 {
+  font-size: 70px;
+  color: #222;
+}
+
+.content p {
+  margin: 10px 0 30px;
+  color: #222;
+}
+
+.content .btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 15px 80px;
+  color: #fff;
+  background-image: linear-gradient(45deg, #ddbf15bd, #d4a710);
+  font-size: 16px;
+  border-radius: 30px;
+  border-top-right-radius: 0;
+  transition: 0.5s;
+}
+
+.content .btn:hover {
+  border-top-right-radius: 30px;
+}
+
+.feature-img {
+  width: 530px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+ 
+.feature-img.anim{
+  animation-delay: 1s;
+}
+.anim{
+  opacity: 0;
+  transform: translateY(30px);
+  animation: moveup 0.5s linear forwards;
+}
+@keyframes moveup{
+  100%{
+      opacity: 1;
+      transform: translateY(0);
+  }
+}

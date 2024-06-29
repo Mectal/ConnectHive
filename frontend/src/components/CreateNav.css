@@ -1,0 +1,44 @@
+/* src/components/CreateNav.css */
+.create-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: transparent;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.create-navbar-logo {
+  display: flex;
+  align-items: center;
+}
+
+.create-navbar-logo img {
+  width: 130px;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.auth-buttons .btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 14px 40px;
+  color: #fff;
+  background-image: linear-gradient(45deg, #ddbf15bd, #d4a710);
+  font-size: 14px;
+  border-radius: 30px;
+  border-top-right-radius: 0;
+  transition: 0.5s;
+  margin-left: 10px;
+}
+
+.auth-buttons .btn:hover {
+  border-top-right-radius: 30px;
+}
