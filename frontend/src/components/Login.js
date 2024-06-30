@@ -1,86 +1,70 @@
 import React, { useState } from 'react';
-import './Login.css';  // Ensure your CSS file is correctly linked
+import { useNavigate } from 'react-router-dom';
+import './Login.module.css';
 
+// Login component
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-    const handleSignIn = (e) => {
-        e.preventDefault();
-        // Logic to handle sign in
-        console.log("Email:", email, "Password:", password);
-    };
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    const handleSignUp = (e) => {
-        e.preventDefault();
-        // Logic to handle sign up
-        console.log("Sign up with email:", email, "Password:", password);
-    };
+      const data = await response.json();
+      console.log('Response data:', data); // Debugging line to check the response data
 
-    return (
-        <div className="container" id="container">
-            <div className="form-container sign-up-container">
-                <form onSubmit={handleSignUp}>
-                    <h1>Create Account</h1>
-                    <div className="social-container">
-                        <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
-                        <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-                        <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
-                    </div>
-                    <span>or use your email for registration</span>
-                    <div className="infield">
-                        <input type="text" placeholder="Name" />
-                        <label></label>
-                    </div>
-                    <div className="infield">
-                        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <label></label>
-                    </div>
-                    <div className="infield">
-                        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <label></label>
-                    </div>
-                    <button type="submit">Sign Up</button>
-                </form>
-            </div>
-            <div className="form-container sign-in-container">
-                <form onSubmit={handleSignIn}>
-                    <h1>Sign in</h1>
-                    <div className="social-container">
-                        <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
-                        <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-                        <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
-                    </div>
-                    <span>or use your account</span>
-                    <div className="infield">
-                        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <label></label>
-                    </div>
-                    <div className="infield">
-                        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <label></label>
-                    </div>
-                    <a href="#" className="forgot">Forgot your password?</a>
-                    <button type="submit">Sign In</button>
-                </form>
-            </div>
-            <div className="overlay-container" id="overlayCon">
-                <div className="overlay">
-                    <div className="overlay-panel overlay-left">
-                        <h1>Welcome Back!</h1>
-                        <p>To keep connected with us please login with your personal info</p>
-                        <button className="ghost" id="signIn">Sign In</button>
-                    </div>
-                    <div className="overlay-panel overlay-right">
-                        <h1>Hello, Friend!</h1>
-                        <p>Enter your personal details and start your journey with us</p>
-                        <button className="ghost" id="signUp">Sign Up</button>
-                    </div>
-                </div>
-                <button className="btnScaled" id="overlayBtn"></button>
-            </div>
-        </div>
-    );
+      if (response.ok) {
+        console.log('Login successful'); // Debugging line to confirm successful login
+        // Store the token in cookies
+        document.cookie = `token=${data.token};path=/`;
+        // Navigate to the dashboard
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Invalid login');
+        console.error('Login error:', data);
+      }
+    } catch (err) {
+      console.error('Error during login:', err);
+      setError('An unexpected error occurred. Please try again.');
+    }
+  };
+
+  return (
+    <div className="container" id="container">
+      <div className="form-container sign-in-container">
+        <form onSubmit={handleSignIn}>
+          <h1>Sign in</h1>
+          <div className="social-container">
+            <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
+            <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
+            <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
+          </div>
+          <span>or use your account</span>
+          {error && <div className="error-message">{error}</div>}
+          <div className="infield">
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label></label>
+          </div>
+          <div className="infield">
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <label></label>
+          </div>
+          <a href="#" className="forgot">Forgot your password?</a>
+          <button type="submit">Sign In</button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

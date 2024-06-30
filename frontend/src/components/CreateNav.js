@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ConnectHiveLogo from '../assets/ConnectHive_Logo_1.jpeg';
 import './CreateNav.css';
 
+// Navigation bar component
 const CreateNav = () => {
   return (
     <nav className="create-navbar">

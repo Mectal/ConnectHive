@@ -1,6 +1,4 @@
-
-
-/* Navbar-specific styles */
+/* CSS for the Navbar component */
 .navbar {
   display: flex;
   align-items: center;
@@ -61,12 +59,3 @@
   background-color: #f39c12; /* Darker gold on hover for interactive feel */
   border-top-right-radius: 30px; /* Maintain rounded corner style on hover */
 }
-@keyframes moveup{
-  100%{
-      opacity: 1;
-      transform: translateY(0);
-  }
-}
-
-
-
