@@ -3,6 +3,7 @@ import Navbar from './Navbar'; // Make sure NavBar is set up correct
 import ContentImage from '../assets/content_image1.jpeg'; // Ensure the path is correct
 import './Home.css'; // Assuming the CSS is set up correctly
 
+// Home component
 const Home = () => {
     return (
         <div className="hero">

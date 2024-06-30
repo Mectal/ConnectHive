@@ -1,4 +1,4 @@
-require('dotenv').config();
+// Import required modules
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
@@ -6,17 +6,23 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt'); // Include bcrypt
+const bcrypt = require('bcrypt');
 const helmet = require('helmet');
-const authenticateTokenFromCookie = require('./authMiddleware'); // Import the middleware
+const authenticateTokenFromCookie = require('./authMiddleware');
+const multer = require('multer');
+const path = require('path');
+const axios = require('axios'); // Import axios for making HTTP requests
+require('dotenv').config();
 
 const app = express();
+
+// Middleware setup
 app.use(bodyParser.json());
 app.use(cors());
-app.use(cookieParser()); // Use cookie-parser to handle cookies
-app.use(helmet()); // Use Helmet to set secure HTTP headers
+app.use(cookieParser());
+app.use(helmet());
 
-// MySQL connection using environment variables
+// Database connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -32,15 +38,58 @@ db.connect((err) => {
   console.log('MySQL Connected...');
 });
 
-// Register User with password hashing
+// Multer storage setup for profile image uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Endpoint to upload profile image
+app.post('/api/upload-profile-image', authenticateTokenFromCookie, upload.single('profileImage'), (req, res) => {
+  const userId = req.user.id;
+  const profileImageUrl = `/uploads/${req.file.filename}`;
+
+  const updateQuery = 'UPDATE users SET profile_image = ? WHERE id = ?';
+  db.query(updateQuery, [profileImageUrl, userId], (err, result) => {
+    if (err) {
+      console.error('Error updating profile image:', err);
+      return res.status(500).send('Server error');
+    }
+    res.json({ message: 'Profile image updated successfully', profileImageUrl });
+  });
+});
+
+// Serve static files from 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ZeroBounce email validation function
+async function validateEmail(email) {
+  const apiKey = process.env.ZERBOUNCE_API_KEY;
+  const url = `https://api.zerobounce.net/v2/validate?api_key=${apiKey}&email=${encodeURIComponent(email)}`;
+  
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error validating email:', error);
+    throw new Error('Email validation failed');
+  }
+}
+
+// Register endpoint with email validation and password hashing
 app.post('/api/register', [
   body('email').isEmail().withMessage('Enter a valid email')
-    .custom((value) => {
-      // Allow only specific email domains
-      const allowedDomains = ['hotmail.com', 'yahoo.com', 'gmail.com'];
-      const domain = value.split('@')[1];
-      if (!allowedDomains.includes(domain)) {
-        throw new Error('Email domain not allowed');
+    .custom(async (value) => {
+      // Validate email using ZeroBounce API
+      const validationResponse = await validateEmail(value);
+      if (validationResponse.status !== 'valid') { // Adjust this based on ZeroBounce's response
+        throw new Error('Email is not valid');
       }
       return true;
     }),
@@ -78,40 +127,41 @@ app.post('/api/register', [
   });
 });
 
-// Login User with password validation
+// Login endpoint
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
+  console.log('Login attempt:', { email }); // Log the email attempt
   const query = 'SELECT * FROM users WHERE email = ?';
 
   db.query(query, [email], async (err, results) => {
     if (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error' });
-      return;
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Server error' });
     }
+    console.log('Database query results:', results);
     if (results.length > 0) {
       const user = results[0];
-      // Compare the provided password with the stored hashed password
       const match = await bcrypt.compare(password, user.password);
+      console.log('Password match:', match);
       if (match) {
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-        res.json({ message: 'Login successful' });
+        console.log('Token generated and sent in response:', token); // Log the token
+        return res.json({ message: 'Login successful', token }); // Include the token in the response
       } else {
-        res.status(401).json({ message: 'Invalid username or password' });
+        console.log('Invalid password');
+        return res.status(401).json({ message: 'Invalid email or password' });
       }
     } else {
-      res.status(401).json({ message: 'Invalid username or password' });
+      console.log('User not found');
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
   });
 });
 
-
-// Profile Creation (protected route)
+// Profile creation endpoint
 app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
-  const { userId, hobbies, personality, lifestyle, socialPreferences, beliefs, goals } = req.body; // Ensure 'beliefs' matches the column in your table
-
-  // Check if the user exists
+  const { userId, hobbies, personality, lifestyle, socialPreferences, beliefs, goals } = req.body;
   const checkUserQuery = 'SELECT id FROM users WHERE id = ?';
   db.query(checkUserQuery, [userId], (err, results) => {
     if (err) {
@@ -123,7 +173,6 @@ app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
       return res.status(400).send('User does not exist');
     }
 
-    // If user exists, proceed to insert the profile
     const insertProfileQuery = `
       INSERT INTO profiles (user_id, hobbies, personality, lifestyle, social_preferences, beliefs, goals) 
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -139,7 +188,7 @@ app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
   });
 });
 
-// Get User by Email (protected route)
+// Fetch user data by email
 app.get('/api/user/:email', authenticateTokenFromCookie, (req, res) => {
   const { email } = req.params;
   const query = 'SELECT * FROM users WHERE email = ?';
@@ -147,30 +196,21 @@ app.get('/api/user/:email', authenticateTokenFromCookie, (req, res) => {
   db.query(query, [email], (err, results) => {
     if (err) throw err;
     if (results.length > 0) {
-      res.json(results[0]); // Return the user data
+      res.json(results[0]);
     } else {
       res.status(404).send('User not found');
     }
   });
 });
 
-// Logout User (clear the token)
+// Logout endpoint
 app.post('/api/logout', (req, res) => {
-  res.clearCookie('token');
+  res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
   res.json({ message: 'Logged out successfully' });
 });
 
+// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
-
-// Improved error handling example for future problems not final
-//app.post('/api/some-endpoint', (req, res) => {
- // try {
- // } catch (error) {
-  //  console.error('Internal Server Error:', error);
- //   res.status(500).json({ message: 'Internal Server Error' });
-//  }
-// });
-
