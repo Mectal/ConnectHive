@@ -122,10 +122,10 @@ const Register = () => {
       <div className="form-container sign-up-container">
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <h1>Create Account</h1>
-          <input type="text" name="name" placeholder="Enter username" className="box" onChange={handleChange} required />
-          <input type="email" name="email" placeholder="Enter email" className="box" onChange={handleChange} required />
-          <input type="password" name="password" placeholder="Enter password" className="box" onChange={handleChange} required />
-          <input type="password" name="cpassword" placeholder="Confirm password" className="box" onChange={handleChange} required />
+          <input type="text" name="name" placeholder="Enter username" className="box" value={formData.name} onChange={handleChange} required />
+          <input type="email" name="email" placeholder="Enter email" className="box" value={formData.email} onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Enter password" className="box" value={formData.password} onChange={handleChange} required />
+          <input type="password" name="cpassword" placeholder="Confirm password" className="box" value={formData.cpassword} onChange={handleChange} required />
 
           <label htmlFor="birthday">Birthday:</label>
           <div className="birthday">
