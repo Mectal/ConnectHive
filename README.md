@@ -1,20 +1,18 @@
 # CREATING connecthive DB in MySQL Workbench
-
--- Create the database
 CREATE DATABASE IF NOT EXISTS connecthive;
-
--- Use the database
 USE connecthive;
 
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  age INT,
+  dob DATE NOT NULL,
   gender VARCHAR(10),
   location VARCHAR(100),
   email VARCHAR(100) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL -- Adjusted length to store bcrypt hashed passwords
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  profile_image VARCHAR(255) DEFAULT NULL -- Profile image stored in users table
 );
 
 -- Profiles Table
@@ -23,13 +21,24 @@ CREATE TABLE IF NOT EXISTS profiles (
   user_id INT NOT NULL,
   hobbies TEXT,
   personality TEXT,
-  lifestyle TEXT,
   social_preferences TEXT,
   beliefs TEXT,
-  goals TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Ensures profiles are removed if the user is deleted
+  meetups TEXT,
+  political_view TEXT,
+  education_level VARCHAR(50),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX (user_id) -- Added index for efficient lookups
 );
+
+-- Preferences Table
+CREATE TABLE IF NOT EXISTS preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  font_size VARCHAR(20) DEFAULT 'normal',
+  theme VARCHAR(20) DEFAULT 'light',
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 
 
 # Key commands for test
