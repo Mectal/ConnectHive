@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Register.css';
 import CreateNav from './CreateNav';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     cpassword: '',
@@ -20,6 +21,7 @@ const Register = () => {
     socialPreferences: '',
     meetups: '',
     values: '',
+    beliefs: '',
     hobbies: [],
     profilePicture: null,
   });
@@ -28,6 +30,7 @@ const Register = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [hobbiesCount, setHobbiesCount] = useState(0);
   const [initialHobbies, setInitialHobbies] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setHobbiesCount(formData.hobbies.length);
@@ -60,12 +63,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/register', formData, {
+      const response = await axios.post('http://localhost:5000/api/register', formData, {
         headers: { 'Content-Type': 'application/json' },
       });
-      setMessage('Registration successful! Please complete your profile.');
+      setMessage('Registration successful! Redirecting to your dashboard...');
+      setTimeout(() => {
+        navigate('/dashboard'); // Adjust the path as needed
+      }, 2000);
     } catch (error) {
-      setMessage(error.response ? 'Email already exists' : 'An error occurred. Please try again.');
+      setMessage(error.response ? error.response.data.message : 'An error occurred. Please try again.');
     }
   };
 
@@ -122,7 +128,8 @@ const Register = () => {
       <div className="form-container sign-up-container">
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <h1>Create Account</h1>
-          <input type="text" name="name" placeholder="Enter username" className="box" onChange={handleChange} required />
+          <input type="text" name="name" placeholder="Enter name" className="box" onChange={handleChange} required />
+          <input type="text" name="username" placeholder="Enter username" className="box" onChange={handleChange} required />
           <input type="email" name="email" placeholder="Enter email" className="box" onChange={handleChange} required />
           <input type="password" name="password" placeholder="Enter password" className="box" onChange={handleChange} required />
           <input type="password" name="cpassword" placeholder="Confirm password" className="box" onChange={handleChange} required />
@@ -168,7 +175,15 @@ const Register = () => {
           </div>
 
           <label htmlFor="educationLevel">Highest Education Level completed:</label>
-          <input type="text" name="educationLevel" placeholder="Example: Highschool" className="box" onChange={handleChange} required />
+          <div className="dropdown">
+            <button type="button" className="dropbtn">Education</button>
+            <div className="dropdown-content">
+              <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('educationLevel', 'Highschool/GED'); }}>Highschool/GED</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('educationLevel', 'College+'); }}>College+</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('educationLevel', 'Other'); }}>Other</a>
+            </div>
+            {formData.educationLevel && <span className="selected-option">{formData.educationLevel}</span>}
+          </div>
 
           <label htmlFor="personalityTraits">Select Your Personality Traits:</label>
           <div className="dropdown">
@@ -201,7 +216,7 @@ const Register = () => {
             {formData.meetups && <span className="selected-option">{formData.meetups}</span>}
           </div>
 
-          <label htmlFor="values">Values and Beliefs:</label>
+          <label htmlFor="values">Values:</label>
           <div className="dropdown">
             <button type="button" className="dropbtn">Politics</button>
             <div className="dropdown-content">
@@ -209,6 +224,16 @@ const Register = () => {
               <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('values', 'Not too political'); }}>Not too political</a>
             </div>
             {formData.values && <span className="selected-option">{formData.values}</span>}
+          </div>
+
+          <label htmlFor="beliefs">Beliefs:</label>
+          <div className="dropdown">
+            <button type="button" className="dropbtn">Beliefs</button>
+            <div className="dropdown-content">
+              <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('beliefs', 'Religious'); }}>Religious</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); handleDropdownChange('beliefs', 'Non-religious'); }}>Non-religious</a>
+            </div>
+            {formData.beliefs && <span className="selected-option">{formData.beliefs}</span>}
           </div>
 
           <label htmlFor="hobbies">Select your favorite Hobbies:</label>
@@ -273,7 +298,7 @@ const Register = () => {
                   <input type="checkbox" value="Volleyball" onChange={handleChange} checked={formData.hobbies.includes('Volleyball')} />Volleyball
                 </label>
               </div>
-              <button className="save-btn" onClick={saveInterests}>Save ({hobbiesCount}/5)</button>
+              <button type="button" className="save-btn" onClick={saveInterests}>Save ({hobbiesCount}/5)</button>
             </div>
           </div>
           {formData.hobbies.length > 0 && (

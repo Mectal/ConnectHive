@@ -1,20 +1,22 @@
 const jwt = require('jsonwebtoken');
 
-// function to authenticate token from cookies
-
-const authenticateTokenFromCookie = (req, res, next) => {
+function authenticateTokenFromCookie(req, res, next) {
   const token = req.cookies.token;
+
+  console.log('Token from cookie:', token); // Debugging log
+
   if (!token) {
-    return res.sendStatus(401); // Unauthorized
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403); // Forbidden
+      console.log('Token verification error:', err); // Debugging log
+      return res.status(403).json({ message: 'Forbidden' });
     }
     req.user = user;
     next();
   });
-};
+}
 
 module.exports = authenticateTokenFromCookie;

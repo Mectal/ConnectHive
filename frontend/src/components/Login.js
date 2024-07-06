@@ -25,16 +25,14 @@ const Login = () => {
 
       if (response.ok) {
         console.log('Login successful'); // Debugging line to confirm successful login
-        // Store the token in cookies
         document.cookie = `token=${data.token};path=/`;
-        // Navigate to the dashboard
         navigate('/dashboard');
       } else {
         setError(data.message || 'Invalid login');
-        console.error('Login error:', data);
+        console.error('Login error:', data); // Debugging line to check error details
       }
     } catch (err) {
-      console.error('Error during login:', err);
+      console.error('Error during login:', err); // Debugging line to check error details
       setError('An unexpected error occurred. Please try again.');
     }
   };
@@ -51,14 +49,8 @@ const Login = () => {
           </div>
           <span>or use your account</span>
           {error && <div className="error-message">{error}</div>}
-          <div className="infield">
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <label></label>
-          </div>
-          <div className="infield">
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <label></label>
-          </div>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           <a href="#" className="forgot">Forgot your password?</a>
           <button type="submit">Sign In</button>
         </form>
