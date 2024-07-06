@@ -1,26 +1,39 @@
-// Import required modules
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
-const authenticateTokenFromCookie = require('./authMiddleware');
 const multer = require('multer');
 const path = require('path');
-const axios = require('axios'); // Import axios for making HTTP requests
 require('dotenv').config();
 
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  methods: 'GET,POST,PUT,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type,Authorization'
+};
+
+app.use(cors(corsOptions));
 // Middleware setup
 app.use(bodyParser.json());
-app.use(cors());
 app.use(cookieParser());
 app.use(helmet());
+
+// Session setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 // Database connection
 const db = mysql.createConnection({
@@ -50,6 +63,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Middleware to authenticate token from cookie
+const authenticateTokenFromCookie = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    req.session.returnTo = req.originalUrl; // Save the return URL in session
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
 // Endpoint to upload profile image
 app.post('/api/upload-profile-image', authenticateTokenFromCookie, upload.single('profileImage'), (req, res) => {
   const userId = req.user.id;
@@ -68,100 +98,145 @@ app.post('/api/upload-profile-image', authenticateTokenFromCookie, upload.single
 // Serve static files from 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ZeroBounce email validation function
-async function validateEmail(email) {
-  const apiKey = process.env.ZERBOUNCE_API_KEY;
-  const url = `https://api.zerobounce.net/v2/validate?api_key=${apiKey}&email=${encodeURIComponent(email)}`;
-  
-  try {
-    const response = await axios.get(url);
-    return response.data;
-  } catch (error) {
-    console.error('Error validating email:', error);
-    throw new Error('Email validation failed');
-  }
-}
+// Email validation function for common domains
+const allowedDomains = [
+  'gmail.com',
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'aol.com',
+  'icloud.com',
+  'mail.com',
+  'live.com',
+  'protonmail.com',
+  'yandex.com'
+];
 
-// Register endpoint with email validation and password hashing
+const validateEmailDomain = (email) => {
+  const emailDomain = email.split('@')[1];
+  return allowedDomains.includes(emailDomain);
+};
+
+// Register endpoint with simple email domain validation and password hashing
 app.post('/api/register', [
-  body('email').isEmail().withMessage('Enter a valid email')
-    .custom(async (value) => {
-      // Validate email using ZeroBounce API
-      const validationResponse = await validateEmail(value);
-      if (validationResponse.status !== 'valid') { // Adjust this based on ZeroBounce's response
-        throw new Error('Email is not valid');
-      }
-      return true;
-    }),
+  body('email').isEmail().withMessage('Enter a valid email').custom((value) => {
+    if (!validateEmailDomain(value)) {
+      throw new Error('Email domain is not allowed');
+    }
+    return true;
+  }),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error('Validation errors:', errors.array());
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, age, gender, location, email, password } = req.body;
+  const { name, username, month, day, year, gender, location, email, password, profileImage, educationLevel, personalityTraits, socialPreferences, meetups, values, beliefs, hobbies } = req.body;
+  const dob = `${year}-${month}-${day}`;
 
-  // Check if the email already exists
+  console.log('Received registration data:', req.body);
+
   const checkEmailQuery = 'SELECT email FROM users WHERE email = ?';
   db.query(checkEmailQuery, [email], async (err, results) => {
     if (err) {
+      console.error('Database error during email check:', err);
       return res.status(500).json({ message: 'Server error' });
     }
 
+    console.log('Email check results:', results);
+
     if (results.length > 0) {
+      console.log('Email already exists:', email);
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // If email is unique, proceed with insertion
-    const insertQuery = 'INSERT INTO users (name, age, gender, location, email, password) VALUES (?, ?, ?, ?, ?, ?)';
-    db.query(insertQuery, [name, age, gender, location, email, hashedPassword], (err, result) => {
+    console.log('Hashed Password:', hashedPassword); // Debugging log
+    const insertUserQuery = 'INSERT INTO users (name, username, dob, gender, location, email, password, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    db.query(insertUserQuery, [name, username, dob, gender, location, email, hashedPassword, profileImage ? profileImage : null], (err, result) => {
       if (err) {
+        console.error('Database error during user insertion:', err);
         return res.status(500).json({ message: 'Server error' });
       }
-      res.json({ message: 'User registered' });
+
+      const userId = result.insertId;
+      console.log('Inserted user with ID:', userId); // Debugging log
+      const insertPreferencesQuery = 'INSERT INTO preferences (user_id, font_size, theme) VALUES (?, ?, ?)';
+      db.query(insertPreferencesQuery, [userId, 'normal', 'light'], (err, result) => {
+        if (err) {
+          console.error('Database error during preferences insertion:', err);
+          return res.status(500).json({ message: 'Error saving preferences', error: err });
+        }
+
+        const insertProfileQuery = `
+          INSERT INTO profiles (user_id, hobbies, personality, social_preferences, beliefs, meetups, political_view, education_level) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        db.query(insertProfileQuery, [userId, JSON.stringify(hobbies), personalityTraits, socialPreferences, beliefs, meetups, values, educationLevel], (err, result) => {
+          if (err) {
+            console.error('Database error during profile insertion:', err);
+            return res.status(500).json({ message: 'Error saving profile', error: err });
+          }
+
+          console.log('User registered successfully:', { userId });
+          res.json({ message: 'User registered successfully', userId });
+        });
+      });
     });
   });
 });
 
 // Login endpoint
-app.post('/api/login', (req, res) => {
+app.post('/api/login', [
+  body('email').isEmail(),
+  body('password').isLength({ min: 5 })
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const { email, password } = req.body;
-  console.log('Login attempt:', { email }); // Log the email attempt
-  const query = 'SELECT * FROM users WHERE email = ?';
 
-  db.query(query, [email], async (err, results) => {
+  console.log('Login attempt:', { email, password }); // Debugging log
+
+  const query = 'SELECT * FROM users WHERE email = ?';
+  db.query(query, [email], (err, results) => {
     if (err) {
-      console.error('Database error:', err);
+      console.error('Database error:', err); // Debugging log
       return res.status(500).json({ message: 'Server error' });
     }
-    console.log('Database query results:', results);
-    if (results.length > 0) {
-      const user = results[0];
-      const match = await bcrypt.compare(password, user.password);
-      console.log('Password match:', match);
-      if (match) {
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-        console.log('Token generated and sent in response:', token); // Log the token
-        return res.json({ message: 'Login successful', token }); // Include the token in the response
-      } else {
-        console.log('Invalid password');
-        return res.status(401).json({ message: 'Invalid email or password' });
-      }
-    } else {
-      console.log('User not found');
+    console.log('Database query results:', results); // Debugging log
+    if (results.length === 0) {
+      console.log('User not found'); // Debugging log
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+    const user = results[0];
+
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) {
+        console.error('Password comparison error:', err); // Debugging log
+        return res.status(500).json({ message: 'Server error' });
+      }
+      console.log('Password match:', isMatch); // Debugging log
+      if (!isMatch) {
+        console.log('Invalid password'); // Debugging log
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.cookie('token', token, { httpOnly: true });
+      console.log('Token generated and sent in response:', token); // Debugging log
+      res.json({ message: 'Login successful', token });
+    });
   });
 });
 
+
 // Profile creation endpoint
 app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
-  const { userId, hobbies, personality, lifestyle, socialPreferences, beliefs, goals } = req.body;
+  const { userId, hobbies, personality, socialPreferences, beliefs, meetups, politicalView, educationLevel } = req.body;
   const checkUserQuery = 'SELECT id FROM users WHERE id = ?';
   db.query(checkUserQuery, [userId], (err, results) => {
     if (err) {
@@ -174,11 +249,11 @@ app.post('/api/profile', authenticateTokenFromCookie, (req, res) => {
     }
 
     const insertProfileQuery = `
-      INSERT INTO profiles (user_id, hobbies, personality, lifestyle, social_preferences, beliefs, goals) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO profiles (user_id, hobbies, personality, social_preferences, beliefs, meetups, political_view, education_level) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
-    db.query(insertProfileQuery, [userId, hobbies, personality, lifestyle, socialPreferences, beliefs, goals], (err, result) => {
+    db.query(insertProfileQuery, [userId, hobbies, personality, socialPreferences, beliefs, meetups, politicalView, educationLevel], (err, result) => {
       if (err) {
         console.error('Error inserting profile:', err);
         return res.status(500).send('Server error');
@@ -205,8 +280,136 @@ app.get('/api/user/:email', authenticateTokenFromCookie, (req, res) => {
 
 // Logout endpoint
 app.post('/api/logout', (req, res) => {
-  res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  res.clearCookie('token', { httpOnly: true });
   res.json({ message: 'Logged out successfully' });
+});
+
+// Password change endpoint
+app.post('/api/change-password', authenticateTokenFromCookie, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  console.log('Password change attempt:', { userId, oldPassword, newPassword });
+
+  const query = 'SELECT password FROM users WHERE id = ?';
+  db.query(query, [userId], async (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    console.log('Database query results:', results);
+
+    if (results.length > 0) {
+      const user = results[0];
+      const match = await bcrypt.compare(oldPassword, user.password);
+
+      console.log('Old password match:', match);
+
+      if (match) {
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        console.log('Hashed new password:', hashedNewPassword);
+        const updateQuery = 'UPDATE users SET password = ? WHERE id = ?';
+
+        db.query(updateQuery, [hashedNewPassword, userId], (err, result) => {
+          if (err) {
+            console.error('Error updating password:', err);
+            return res.status(500).json({ message: 'Server error' });
+          }
+          console.log('Password updated in database');
+          res.json({ message: 'Password changed successfully' });
+        });
+      } else {
+        console.log('Incorrect old password');
+        res.status(401).json({ message: 'Invalid password' });
+      }
+    } else {
+      console.log('User not found for password change');
+      res.status(404).json({ message: 'User not found' });
+    }
+  });
+});
+
+// Fetch user data (profile pic, preferences)
+app.get('/api/user', authenticateTokenFromCookie, (req, res) => {
+  console.log('User ID from token:', req.user.id); // Debugging log
+  const userId = req.user.id;
+
+  const userQuery = 'SELECT * FROM users WHERE id = ?';
+  const profileQuery = 'SELECT * FROM profiles WHERE user_id = ?';
+  const preferencesQuery = 'SELECT * FROM preferences WHERE user_id = ?';
+
+  db.query(userQuery, [userId], (err, userResults) => {
+    if (err) {
+      console.error('Database query error (users):', err); // Debugging log
+      return res.status(500).json({ message: 'Server error', error: err });
+    }
+    if (userResults.length === 0) {
+      console.log('User not found'); // Debugging log
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResults[0];
+
+    db.query(profileQuery, [userId], (err, profileResults) => {
+      if (err) {
+        console.error('Database query error (profiles):', err); // Debugging log
+        return res.status(500).json({ message: 'Server error', error: err });
+      }
+
+      const profile = profileResults.length > 0 ? profileResults[0] : null;
+
+      db.query(preferencesQuery, [userId], (err, preferencesResults) => {
+        if (err) {
+          console.error('Database query error (preferences):', err); // Debugging log
+          return res.status(500).json({ message: 'Server error', error: err });
+        }
+
+        const preferences = preferencesResults.length > 0 ? preferencesResults[0] : null;
+
+        const userData = {
+          ...user,
+          profile,
+          preferences
+        };
+
+        console.log('Returning user data:', userData); // Debugging log
+        res.json(userData);
+      });
+    });
+  });
+});
+
+app.get('/api/preferences/:userId', authenticateTokenFromCookie, (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM preferences WHERE user_id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Server error', error: err });
+    if (results.length === 0) return res.status(404).json({ message: 'Preferences not found' });
+    res.json(results[0]);
+  });
+});
+
+app.post('/api/savePreferences', authenticateTokenFromCookie, (req, res) => {
+  const { userId, fontSize, theme } = req.body;
+  const updateQuery = 'UPDATE preferences SET font_size = ?, theme = ? WHERE user_id = ?';
+
+  db.query(updateQuery, [fontSize, theme, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Server error', error: err });
+    res.json({ message: 'Preferences saved successfully' });
+  });
+});
+
+// Catch-all error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Server error', error: err.message });
+});
+
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Not Found' });
 });
 
 // Start the server

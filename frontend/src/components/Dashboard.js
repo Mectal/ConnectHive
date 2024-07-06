@@ -9,13 +9,44 @@ import logoutImg from '../assets/logout.png';
 
 const Dashboard = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState(defaultUserImg);
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('token='));
-    if (!token) {
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    if (!tokenCookie) {
       navigate('/login');
+    } else {
+      const token = tokenCookie.split('=')[1];
+      console.log('Token from cookie:', token); // Debugging log
+      fetch('/api/user', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      })
+      .then(response => {
+        console.log('Fetch response status:', response.status); // Debugging log
+        if (response.ok) {
+          return response.json();
+        } else {
+          console.error('Fetch error response:', response); // Debugging log
+          throw new Error('Failed to fetch user data');
+        }
+      })
+      .then(data => {
+        console.log('Fetched user data:', data); // Debugging log
+        if (!data || data.message === 'Unauthorized' || data.message === 'Forbidden') {
+          navigate('/login');
+        } else {
+          setUserData(data);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching user data:', err);
+        navigate('/login');
+      });
     }
   }, [navigate]);
 
@@ -30,32 +61,8 @@ const Dashboard = () => {
         'Content-Type': 'application/json'
       }
     });
-    // Clear the token from cookies
     document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-    navigate('/'); // Redirect to the main homepage after logout
-  };
-
-  const handleImageChange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-
-      const response = await fetch('/api/upload-profile-image', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${document.cookie.split('token=')[1]}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfileImage(data.profileImageUrl);
-      } else {
-        console.error('Failed to upload image');
-      }
-    }
+    navigate('/');
   };
 
   return (
@@ -67,12 +74,12 @@ const Dashboard = () => {
           <li><a href="#">Events Near You</a></li>
           <li><a href="#">Messages</a></li>
         </ul>
-        <img src={profileImage} alt="Profile" className="dashboard-profile-pic" onClick={toggleMenu} />
+        <img src={userData.profile_image || defaultUserImg} alt="Profile" className="dashboard-profile-pic" onClick={toggleMenu} />
         <div className={`dashboard-sub-menu-wrap ${menuOpen ? 'open-menu' : ''}`} id="subMenu">
           <div className="dashboard-sub-menu">
             <div className="dashboard-user-info">
-              <img src={profileImage} alt="User" />
-              <h2>User Name</h2>
+              <img src={userData.profile_image || defaultUserImg} alt="User" />
+              <h2>{userData.username || 'User Name'}</h2>
             </div>
             <hr />
             <a href="#" className="dashboard-sub-menu-link">
@@ -80,7 +87,7 @@ const Dashboard = () => {
               <p>Profile</p>
               <span>{'>'}</span>
             </a>
-            <a href="#" className="dashboard-sub-menu-link">
+            <a href="#" className="dashboard-sub-menu-link" onClick={() => navigate('/settings')}>
               <img src={settingImg} alt="Settings" />
               <p>Settings</p>
               <span>{'>'}</span>
