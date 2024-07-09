@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import './Profile.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import './Profile.css';
 
-// Profile component
 const Profile = () => {
   const [user, setUser] = useState({});
-  
+
   useEffect(() => {
-    // Fetch user data here
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/api/profile', {
+    axios.get('http://localhost:5000/api/user', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -36,7 +34,13 @@ const Profile = () => {
       <div className="container">
         <div className="header">Profile</div>
         <div className="profile-picture">
-          <img src={user.profilePicture || 'path_to_default_profile_picture'} alt="Profile Picture" />
+          <img 
+            src={user.profile_image ? `http://localhost:5000${user.profile_image}` : 'path_to_default_profile_picture'}
+            alt="Profile Picture" 
+            loading="lazy" 
+            width="150" 
+            height="150" 
+          />
         </div>
         <div className="info-group">
           <label>Username:</label>
@@ -52,15 +56,15 @@ const Profile = () => {
         </div>
         <div className="info-group">
           <label>Highest Education Level Completed:</label>
-          <div className="info">{user.educationLevel || 'N/A'}</div>
+          <div className="info">{user.education_level || 'N/A'}</div>
         </div>
         <div className="info-group">
           <label>Personality Traits:</label>
-          <div className="info">{user.personalityTraits || 'N/A'}</div>
+          <div className="info">{user.personality || 'N/A'}</div>
         </div>
         <div className="info-group">
           <label>Group Size:</label>
-          <div className="info">{user.socialPreferences || 'N/A'}</div>
+          <div className="info">{user.social_preferences || 'N/A'}</div>
         </div>
         <div className="info-group">
           <label>Meetups:</label>
@@ -68,7 +72,7 @@ const Profile = () => {
         </div>
         <div className="info-group">
           <label>Values and Beliefs:</label>
-          <div className="info">{user.values || 'N/A'}</div>
+          <div className="info">{user.beliefs || 'N/A'}</div>
         </div>
         <div className="info-group">
           <label>Favorite Hobbies:</label>
