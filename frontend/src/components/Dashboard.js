@@ -19,12 +19,13 @@ const Dashboard = () => {
     } else {
       const token = tokenCookie.split('=')[1];
       console.log('Token from cookie:', token); // Debugging log
-      fetch('/api/user', {
+      fetch('http://localhost:5000/api/user', {  // Updated URL to include backend port
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        }
+        },
+        credentials: 'include', // Ensures cookies are sent with the request
       })
       .then(response => {
         console.log('Fetch response status:', response.status); // Debugging log
@@ -55,30 +56,38 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    await fetch('/api/logout', {
+    await fetch('http://localhost:5000/api/logout', {  // Updated URL to include backend port
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Ensures cookies are sent with the request
     });
     document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-    navigate('/');
+    navigate('/'); // Redirect to home page
   };
 
   return (
     <div className="dashboard-hero">
       <nav className="dashboard-nav">
         <ul className="dashboard-nav-links">
-          <li><a href="#">Home</a></li>
           <li><a href="#">Find A New Hive</a></li>
           <li><a href="#">Events Near You</a></li>
-          <li><a href="#">Messages</a></li>
+          <li><a href="#">MyHive</a></li> 
         </ul>
-        <img src={userData.profile_image || defaultUserImg} alt="Profile" className="dashboard-profile-pic" onClick={toggleMenu} />
+        <img
+          src={userData.profile_image ? `http://localhost:5000${userData.profile_image}` : defaultUserImg}
+          alt="Profile"
+          className="dashboard-profile-pic"
+          onClick={toggleMenu}
+        />
         <div className={`dashboard-sub-menu-wrap ${menuOpen ? 'open-menu' : ''}`} id="subMenu">
           <div className="dashboard-sub-menu">
             <div className="dashboard-user-info">
-              <img src={userData.profile_image || defaultUserImg} alt="User" />
+              <img
+                src={userData.profile_image ? `http://localhost:5000${userData.profile_image}` : defaultUserImg}
+                alt="User"
+              />
               <h2>{userData.username || 'User Name'}</h2>
             </div>
             <hr />

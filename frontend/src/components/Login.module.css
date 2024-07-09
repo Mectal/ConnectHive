@@ -1,103 +1,243 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 .login-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: #f6f5f7;
-    font-family: 'Poppins', sans-serif;
+  --linear-grad: linear-gradient(to right, #ddbf15bd, #d4a710);
+  --grad-clr1: #d4a710;
+  --grad-clr2: #ddbf15bd;
+  height: 100vh;
+  background: #f6f5f7;
+  display: grid;
+  place-content: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-page * {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
 }
 
 .login-page .container {
-    display: flex;
-    width: 850px;
-    height: 500px;
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 850px;
+  height: 500px;
+  background-color: #fff;
+  box-shadow: 25px 30px 55px #5557;
+  border-radius: 13px;
+  overflow: hidden;
 }
 
-.login-page .form-container {
-    position: relative;
-    width: 60%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 50px;
+.login-page .formContainer {
+  position: absolute;
+  width: 60%;
+  height: 100%;
+  padding: 0px 40px;
+  transition: all 0.6s ease-in-out;
 }
 
-.login-page .social-container {
-    margin: 20px 0;
+.login-page .signUpContainer {
+  opacity: 0;
+  z-index: 1;
 }
 
-.login-page .social-container a {
-    border: 1px solid #ddd;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    height: 40px;
-    width: 40px;
-    color: #333;
-    margin: 0 5px;
+.login-page .signInContainer {
+  z-index: 2;
 }
 
-.login-page input[type="email"], .login-page input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.login-page form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 50px;
+}
+
+.login-page h1 {
+  color: var(--grad-clr1);
+}
+
+.login-page .socialContainer {
+  margin: 20px 0px;
+}
+
+.login-page .socialContainer a {
+  border: 1px solid #DDD;
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0px 5px;
+  height: 40px;
+  width: 40px;
+}
+
+.login-page span {
+  font-size: 12px;
+}
+
+.login-page .infield {
+  position: relative;
+  margin: 8px 0px;
+  width: 100%;
+}
+
+.login-page input {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #f3f3f3;
+  border: none;
+  outline: none;
+}
+
+.login-page label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 2px;
+  background: var(--linear-grad);
+  transition: 0.3s;
+}
+
+.login-page input:focus ~ label {
+  width: 100%;
+}
+
+.login-page a {
+  color: #333;
+  text-decoration: none;
+  margin: 15px 0px;
+}
+
+.login-page a.forgot {
+  padding-bottom: 3px;
+  border-bottom: 2px solid #EEE;
 }
 
 .login-page button {
-    width: 100%;
-    padding: 12px 20px;
-    background-color: #d4a710;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    margin-top: 20px;
-    cursor: pointer;
+  border-radius: 20px;
+  border: 1px solid var(--grad-clr1);
+  background: var(--grad-clr2);
+  color: #FFF;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
-.login-page .overlay-container {
-    background-color: #d4a710;
-    width: 40%;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    padding: 0 40px;
+.login-page .formContainer button {
+  margin-top: 17px;
+  transition: 80ms ease-in;
 }
 
-.login-page .overlay-panel {
-    margin-top: 30px;
+.login-page .formContainer button:hover {
+  background: #FFF;
+  color: var(--grad-clr1);
 }
 
-.login-page .overlay-panel h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
+.login-page .overlayContainer {
+  position: absolute;
+  top: 0;
+  left: 60%;
+  width: 40%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
+  z-index: 9;
 }
 
-.login-page .overlay-panel p {
-    font-size: 16px;
-    line-height: 1.6;
+.login-page #overlayBtn {
+  cursor: pointer;
+  position: absolute;
+  left: 50%;
+  top: 318px;
+  transform: translateX(-50%);
+  width: 143.67px;
+  height: 40px;
+  border: 1px solid #FFF;
+  background: transparent;
+  border-radius: 20px;
 }
 
-.login-page button.ghost {
-    background-color: transparent;
-    border: 2px solid white;
-    width: auto;
-    padding: 10px 20px;
+.login-page .overlay {
+  position: relative;
+  background: var(--linear-grad);
+  color: #FFF;
+  left: -150%;
+  height: 100%;
+  width: 250%;
+  transition: transform 0.6s ease-in-out;
 }
 
-.login-page button.ghost:hover {
-    background-color: white;
-    color: #d4a710;
+.login-page .overlayPanel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0px 40px;
+  text-align: center;
+  height: 100%;
+  width: 340px;
+  transition: 0.6s ease-in-out;
+}
+
+.login-page .overlayLeft {
+  top: 15px;
+  right: 60%;
+  transform: translateX(-12%);
+}
+
+.login-page .overlayRight {
+  right: 0;
+  transform: translate(0%);
+}
+
+.login-page .overlayPanel h1 {
+  color: #fff;
+}
+
+.login-page p {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+  letter-spacing: 0.5px;
+  margin: 25px 0px 35px;
+}
+
+.login-page .overlayPanel button {
+  border: none;
+  background-color: transparent;
+}
+
+@keyframes show {
+  0%,
+  50% {
+    opacity: 0;
+    z-index: 1;
+  }
+  50.1%,
+  100% {
+    opacity: 1;
+    z-index: 5;
+  }
+}
+
+.login-page .btnScaled {
+  animation: scaledBtn 0.6s;
+}
+
+@keyframes scaleBtn {
+  0% {
+    width: 143.67px;
+  }
+  50% {
+    width: 250px;
+  }
+  100% {
+    width: 143.67px;
+  }
 }

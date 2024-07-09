@@ -1,5 +1,5 @@
 # CREATING connecthive DB in MySQL Workbench
-CREATE DATABASE IF NOT EXISTS connecthive;
+CCREATE DATABASE IF NOT EXISTS connecthive;
 USE connecthive;
 
 -- Users Table
@@ -38,6 +38,19 @@ CREATE TABLE IF NOT EXISTS preferences (
   theme VARCHAR(20) DEFAULT 'light',
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Messages Table
+CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sender_id INT NOT NULL,
+  receiver_id INT NOT NULL,
+  content TEXT NOT NULL,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
 
 
 

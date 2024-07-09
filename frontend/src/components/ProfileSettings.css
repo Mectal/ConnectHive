@@ -1,11 +1,16 @@
 /* Custom styles for Profile Settings */
 
-
 body {
   margin-top: 20px;
   color: #1a202c;
   text-align: left;
   background-color: #e2e8f0;
+  
+}
+
+body.dark {
+  background-color: black;
+  color: white;
 }
 
 .main-body {
@@ -27,12 +32,18 @@ body {
   background-clip: border-box;
   border: 0 solid rgba(0, 0, 0, .125);
   border-radius: .25rem;
+  
+}
+
+body.dark .card {
+  background-color: #333;
 }
 
 .card-body {
   flex: 1 1 auto;
   min-height: 1px;
   padding: 1rem;
+  
 }
 
 .gutters-sm {
@@ -71,7 +82,7 @@ body {
 .btn-primary {
   color: #ffffff;
   background-color: #d4a710;
-  border: none; /* Remove border */
+  border: none;
 }
 
 .custom-nav .nav-link {
@@ -80,18 +91,40 @@ body {
   height: 80px;
 }
 
-
 .button-group .btn {
-  margin-right: 10px; /* Add space between buttons */
+  margin-right: 10px;
   background-color: #d4a710 !important;
 }
 
 .button-group .btn:hover {
-  background-color: #c79818 !important; 
+  background-color: #c79818 !important;
   border-top-right-radius: 0 !important;
 }
 
-/* Ensure no transition effect */
 .button-group .btn {
   transition: none !important;
+}
+
+/* New styles for button colors based on theme */
+body .breadcrumb-item a {
+  color: black !important; /* Always black */
+}
+
+body .breadcrumb-item.active {
+  color: black !important;
+  font-weight: bold;
+}
+
+body .nav-link.has-icon,
+body .nav-item.nav-link.has-icon,
+body .form-check-label {
+  color: black; /* Default color */
+  font-weight: bold; /* Bold text */
+}
+
+body.dark .nav-link.has-icon,
+body.dark .nav-item.nav-link.has-icon,
+body.dark .form-check-label {
+  color: white; /* Dark mode color */
+  font-weight: bold; /* Bold text */
 }

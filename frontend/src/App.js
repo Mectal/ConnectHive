@@ -5,6 +5,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Settings from './components/ProfileSettings';
+import ChatPage from './components/ChatPage';  // Import the new ChatPage component
 import './App.css';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/chat" element={<ChatPage />} />  {/* Add new route for ChatPage */}
                 </Routes>
             </Router>
         </div>
